@@ -3,10 +3,11 @@ package main
 import (
   "log"
   "os"
-  "fmt"
   "text/template"
   "encoding/csv"
   "strconv"
+  "net/http"
+
 )
 
 type Stock struct {
@@ -19,13 +20,13 @@ type Stock struct {
   AdjClose float64
 }
 
-var tpl *template.Template
-
-func init() {
-  tpl = template.Must(template.ParseFiles("stocks.gohtml"))
-}
 
 func main() {
+  http.HandleFunc("/parse", parse)
+  http.ListenAndServe(":8080", nil)
+}
+
+func parse(res http.ResponseWriter, req *http.Request) {
   csvIn, errOpen := os.Open("table.csv")
  
   if errOpen != nil {
@@ -42,8 +43,6 @@ func main() {
 
     if i > 0 && i <= 2 {
       open, err     := strconv.ParseFloat(record[1], 64)
-      fmt.Println(open)
-
       high, err     := strconv.ParseFloat(record[2], 64)
       low, err      := strconv.ParseFloat(record[3], 64)
       close, err    := strconv.ParseFloat(record[4], 64)
@@ -65,10 +64,11 @@ func main() {
       })
     }
   }
-
-  tplErr := tpl.Execute(os.Stdout, stocks)
   
-  if tplErr != nil {
+  tpl, err := template.ParseFiles("stocks.gohtml")
+  err = tpl.Execute(res, stocks)
+  
+  if err != nil {
     log.Fatalln(err)
   }
 }
