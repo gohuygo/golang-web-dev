@@ -29,13 +29,15 @@ func handle(conn net.Conn) {
 	defer conn.Close()
 
 	// read request
-	request(conn)
+	url := request(conn)
 
 	// write response
-	respond(conn)
+	respond(conn, url)
 }
 
-func request(conn net.Conn) {
+func request(conn net.Conn) string{
+	var url string
+
 	i := 0
 	scanner := bufio.NewScanner(conn)
 	for scanner.Scan() {
@@ -43,8 +45,8 @@ func request(conn net.Conn) {
 		fmt.Println(ln)
 		if i == 0 {
 			// request line
-			m := strings.Fields(ln)[0]
-			fmt.Println("***METHOD", m)
+			// m := strings.Fields(ln)[0]
+			url = strings.Fields(ln)[1]
 		}
 		if ln == "" {
 			// headers are done
@@ -52,11 +54,20 @@ func request(conn net.Conn) {
 		}
 		i++
 	}
+	return url
 }
 
-func respond(conn net.Conn) {
+func respond(conn net.Conn, url string ) {
+	var body string
+	
+	if url != "" && url == "/hello" {
+		body = `<!DOCTYPE html><html lang="en"><head><meta charet="UTF-8"><title></title></head><body><strong>Hello</strong></body></html>`
+	} else {
+		body = `<!DOCTYPE html><html lang="en"><head><meta charet="UTF-8"><title></title></head><body><strong>Something else</strong></body></html>`
 
-	body := `<!DOCTYPE html><html lang="en"><head><meta charet="UTF-8"><title></title></head><body><strong>Hello World</strong></body></html>`
+	}
+
+
 
 	fmt.Fprint(conn, "HTTP/1.1 200 OK\r\n")
 	fmt.Fprintf(conn, "Content-Length: %d\r\n", len(body))
