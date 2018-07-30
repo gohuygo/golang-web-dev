@@ -1,27 +1,8 @@
-// # Building upon the code from the previous exercise:
+// # Building upon the code from the previous problem:
 
-// We are now going to get "I see you connected" to be written.
+// Print to standard out (the terminal) the REQUEST method and the REQUEST URI from the REQUEST LINE.
 
-// When we used bufio.NewScanner(), our code was reading from an io.Reader that never ended.
-
-// We will now break out of the reading.
-
-// Package bufio has the Scanner type. The Scanner type "provides a convenient interface for reading data". When you have a Scanner type, you can call the SCAN method on it. Successive calls to the Scan method will step through the tokens (piece of data). The default token is a line. The Scanner type also has a TEXT method. When you call this method, you will be given the text from the current token. Here is how you will use it:
-
-// scanner := bufio.NewScanner(conn)
-// for scanner.Scan() {
-//   ln := scanner.Text()
-//   fmt.Println(ln)
-// }
-
-// Use this code to READ from an incoming connection and print the incoming text to standard out (the terminal).
-
-// When your "ln" line of text is equal to an empty string, break out of the loop.
-
-// Run your code and go to localhost:8080 in **your browser.**
-
-// What do you find?
-
+// Add this data to your REPONSE so that this data is displayed in the browser.
 package main
 
 import (
@@ -30,6 +11,7 @@ import (
   "io"
   "bufio"
   "fmt"
+  "strings"
 )
 
 func main() {
@@ -50,20 +32,36 @@ func main() {
 }
 
 func serve(conn net.Conn) {
+  defer conn.Close()
   scanner := bufio.NewScanner(conn)
+  i := 0
+  var method, uri string
+
   for scanner.Scan() {
     ln := scanner.Text()
-    fmt.Println(ln)
+    if i == 0 {
+      xs := strings.Fields(ln)
+      method = xs[0]
+      uri = xs[1]
+      fmt.Println("METHOD:", method)
+      fmt.Println("URI:", uri)
+    }
 
     if ln == "" {
       fmt.Println("THIS IS THE END OF THE HTTP REQUEST HEADERS")
       break
     }
+    i++
   }
-  defer conn.Close()
+ 
+  body := "METHOD IS " + method + "\n" + "URI IS " + uri
 
-  fmt.Println("Code got here.")
-  io.WriteString(conn, "I see you connected.")
+  io.WriteString(conn, "HTTP/1.1 200 OK\r\n")
+  fmt.Fprintf(conn, "Content-Length: %d\r\n", len(body))
+  fmt.Fprint(conn, "Content-Type: text/plain\r\n")
+  io.WriteString(conn, "\r\n")
+  io.WriteString(conn, body)
+
 
 }
 
