@@ -1,18 +1,26 @@
-// # Create a basic server using TCP.
+// # Building upon the code from the previous exercise:
 
-// The server should use net.Listen to listen on port 8080. 
+// We are now going to get "I see you connected" to be written.
 
-// Remember to close the listener using defer.
+// When we used bufio.NewScanner(), our code was reading from an io.Reader that never ended.
 
-// Remember that from the "net" package you first need to LISTEN, then you need to ACCEPT an incoming connection.
- 
-// Now write a response back on the connection.
+// We will now break out of the reading.
 
-// Use io.WriteString to write the response: I see you connected.
+// Package bufio has the Scanner type. The Scanner type "provides a convenient interface for reading data". When you have a Scanner type, you can call the SCAN method on it. Successive calls to the Scan method will step through the tokens (piece of data). The default token is a line. The Scanner type also has a TEXT method. When you call this method, you will be given the text from the current token. Here is how you will use it:
 
-// Remember to close the connection.
+// scanner := bufio.NewScanner(conn)
+// for scanner.Scan() {
+//   ln := scanner.Text()
+//   fmt.Println(ln)
+// }
 
-// Once you have all of that working, run your TCP server and test it from telnet (telnet localhost 8080).
+// Use this code to READ from an incoming connection and print the incoming text to standard out (the terminal).
+
+// When your "ln" line of text is equal to an empty string, break out of the loop.
+
+// Run your code and go to localhost:8080 in **your browser.**
+
+// What do you find?
 
 package main
 
@@ -20,6 +28,8 @@ import (
   "net"
   "log"
   "io"
+  "bufio"
+  "fmt"
 )
 
 func main() {
@@ -35,12 +45,25 @@ func main() {
       log.Println(err)
       continue
     }
-    go handle(conn)
+    go serve(conn)
   }
 }
 
-func handle(conn net.Conn) {
-  io.WriteString(conn, "I see you connected.")
+func serve(conn net.Conn) {
+  scanner := bufio.NewScanner(conn)
+  for scanner.Scan() {
+    ln := scanner.Text()
+    fmt.Println(ln)
+
+    if ln == "" {
+      fmt.Println("THIS IS THE END OF THE HTTP REQUEST HEADERS")
+      break
+    }
+  }
   defer conn.Close()
+
+  fmt.Println("Code got here.")
+  io.WriteString(conn, "I see you connected.")
+
 }
 
