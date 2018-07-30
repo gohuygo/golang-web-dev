@@ -1,46 +1,65 @@
-package main
+      package main
 
-import (
-  "log"
-  "net/http"
-  "text/template"
-)
+      import (
+        "log"
+        "net/http"
+        "text/template"
+      )
 
+      // 1. Take the previous program and change it so that:
+      // * func main uses http.Handle instead of http.HandleFunc
 
-// 1. Take the previous program in the previous folder and change it so that:
-// * a template is parsed and served
-// * you pass data into the template
+      // Contstraint: Do not change anything outside of func main
 
-var tpl *template.Template
+      // Hints:
 
-func init() {
-  tpl = template.Must(template.ParseGlob("*.gohtml"))
-}
+      // [http.HandlerFunc](https://godoc.org/net/http#HandlerFunc)
+      // ``` Go
+      // type HandlerFunc func(ResponseWriter, *Request)
+      // ```
 
-func main() {
-  http.HandleFunc("/me", me)
-  http.HandleFunc("/", root)
-  http.HandleFunc("/dog", dog)
-  http.ListenAndServe(":8080", nil)
-}
+      // [http.HandleFunc](https://godoc.org/net/http#HandleFunc)
+      // ``` Go
+      // func HandleFunc(pattern string, handler func(ResponseWriter, *Request))
+      // ```
 
-func me(w http.ResponseWriter, r *http.Request) {
-  err := tpl.ExecuteTemplate(w, "index.gohtml", "Huy")
-  if err != nil {
-    log.Fatalln(err)
-  }
-}
+      // [source code for HandleFunc](https://golang.org/src/net/http/server.go#L2069)
+      // ``` Go
+      //   func (mux *ServeMux) HandleFunc(pattern string, handler func(ResponseWriter, *Request)) {
+      //       mux.Handle(pattern, HandlerFunc(handler))
+      //   }
+      // ```
 
-func dog(w http.ResponseWriter, r *http.Request) {
-  err := tpl.ExecuteTemplate(w, "index.gohtml", "dog")
-  if err != nil {
-    log.Fatalln(err)
-  }
-}
+      var tpl *template.Template
 
-func root(w http.ResponseWriter, r *http.Request) {
-  err := tpl.ExecuteTemplate(w, "index.gohtml", "root")
-  if err != nil {
-    log.Fatalln(err)
-  }
-}
+      func init() {
+        tpl = template.Must(template.ParseGlob("*.gohtml"))
+      }
+
+      func main() {
+        http.Handle("/me", http.HandlerFunc(me))
+        http.Handle("/", http.HandlerFunc(root))
+        http.Handle("/dog", http.HandlerFunc(dog))
+        http.ListenAndServe(":8080", nil)
+      }
+
+      func me(w http.ResponseWriter, r *http.Request) {
+        err := tpl.ExecuteTemplate(w, "index.gohtml", "Huy")
+        if err != nil {
+          log.Fatalln(err)
+        }
+      }
+
+      func dog(w http.ResponseWriter, r *http.Request) {
+        err := tpl.ExecuteTemplate(w, "index.gohtml", "dog")
+        if err != nil {
+          log.Fatalln(err)
+        }
+      }
+
+      func root(w http.ResponseWriter, r *http.Request) {
+        err := tpl.ExecuteTemplate(w, "index.gohtml", "root")
+        if err != nil {
+          log.Fatalln(err)
+        }
+      }
