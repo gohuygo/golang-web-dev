@@ -2,17 +2,17 @@ package main
 
 import (
 	"html/template"
-	"log"
+	// "log"
 	"net/http"
 )
 
 type hotdog int
 
 func (m hotdog) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	err := req.ParseForm()
-	if err != nil {
-		log.Fatalln(err)
-	}
+	// err := req.ParseForm()
+	// if err != nil {
+	// 	log.Fatalln(err)
+	// }
 
 	tpl.ExecuteTemplate(w, "index.gohtml", req.Form)
 }
