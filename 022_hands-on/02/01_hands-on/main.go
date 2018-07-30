@@ -1,8 +1,8 @@
 // # Building upon the code from the previous problem:
 
-// Print to standard out (the terminal) the REQUEST method and the REQUEST URI from the REQUEST LINE.
+// Change your RESPONSE HEADER "content-type" from "text/plain" to "text/html"
 
-// Add this data to your REPONSE so that this data is displayed in the browser.
+// Change the RESPONSE from "CHECK OUT THE RESPONSE BODY PAYLOAD" (and everything else it contained: request method, request URI) to an HTML PAGE that prints "HOLY COW THIS IS LOW LEVEL" in <h1> tags.
 package main
 
 import (
@@ -54,11 +54,21 @@ func serve(conn net.Conn) {
     i++
   }
  
-  body := "METHOD IS " + method + "\n" + "URI IS " + uri
-
+  body := `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>TEST</title>
+    </head>
+    <body>
+      <h1>"HOLY COW THIS IS LOW LEVEL"</h1>
+    </body>
+    </html>
+  `
   io.WriteString(conn, "HTTP/1.1 200 OK\r\n")
   fmt.Fprintf(conn, "Content-Length: %d\r\n", len(body))
-  fmt.Fprint(conn, "Content-Type: text/plain\r\n")
+  fmt.Fprint(conn, "Content-Type: text/html\r\n")
   io.WriteString(conn, "\r\n")
   io.WriteString(conn, body)
 
