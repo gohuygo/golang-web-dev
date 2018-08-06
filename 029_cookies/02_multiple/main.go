@@ -9,14 +9,13 @@ import (
 func main() {
 	http.HandleFunc("/", set)
 	http.HandleFunc("/read", read)
-	http.HandleFunc("/abundance", abundance)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
 	http.ListenAndServe(":8080", nil)
 }
 
 func set(w http.ResponseWriter, req *http.Request) {
 	http.SetCookie(w, &http.Cookie{
-		Name:  "my-cookie",
+		Name:  "count",
 		Value: "some value",
 	})
 	fmt.Fprintln(w, "COOKIE WRITTEN - CHECK YOUR BROWSER")
