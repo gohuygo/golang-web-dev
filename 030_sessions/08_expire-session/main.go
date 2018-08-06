@@ -1,3 +1,26 @@
+// Take the code from "030_sessions/08_expire-session" and get it running on AWS.
+
+// Remember to change the port number from 8080 to 80.
+
+// You will need to modify your service configuration file to include information about your working directory:
+
+// ```
+// [Unit]
+// Description=Go Server
+
+// [Service]
+// ExecStart=/home/<username>/<exepath>
+// WorkingDirectory=/home/<username>/<working-dir>
+// User=root
+// Group=root
+// Restart=always
+
+// [Install]
+// WantedBy=multi-user.target
+// ```
+
+
+
 package main
 
 import (
@@ -40,7 +63,7 @@ func main() {
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/logout", logout)
 	http.Handle("/favicon.ico", http.NotFoundHandler())
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":80", nil)
 }
 
 func index(w http.ResponseWriter, req *http.Request) {
